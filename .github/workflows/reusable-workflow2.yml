@@ -1,0 +1,18 @@
+on:
+  workflow_call:                                  
+    inputs:
+      environment:
+        type: string                                 
+        required: true                              
+    outputs:                                         
+      image-tag:                                    
+        value: ${{ jobs.build.outputs.tag }}      
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:                                       
+      tag: ${{ steps.tag.outputs.value }}         
+    steps:
+      - id: tag                                      
+        run: echo "value=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"

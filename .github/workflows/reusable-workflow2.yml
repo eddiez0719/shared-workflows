@@ -1,18 +1,14 @@
 on:
-  workflow_call:                                  
-    inputs:
-      environment:
-        type: string                                 
-        required: true                              
-    outputs:                                         
-      image-tag:                                    
-        value: ${{ jobs.build.outputs.tag }}      
+  workflow_dispatch:                       # workflow_dispatch：手动触发，会在 Actions 页面弹出表单
+    inputs:                                # inputs：定义表单里的参数
+      environment:                         # 参数名
+        description: '部署环境'             # description：表单上显示的说明文字
+        type: choice                       # type：参数类型，choice 是下拉选择
+        options: [dev, qa, staging, prod]  # options：下拉框的可选值
+        default: dev                       # default：默认选中的值
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
-    outputs:                                       
-      tag: ${{ steps.tag.outputs.value }}         
     steps:
-      - id: tag                                      
-        run: echo "value=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+      - run: make deploy ENV=${{ inputs.environment }}   # inputs.参数名 取到表单里填的值

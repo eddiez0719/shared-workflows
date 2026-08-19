@@ -1,14 +1,19 @@
+name: Reusable Deploy                      # 显示在 Actions 页面的 workflow 名字
+
 on:
-  workflow_dispatch:                       # workflow_dispatch：手动触发，会在 Actions 页面弹出表单
-    inputs:                                # inputs：定义表单里的参数
-      environment:                         # 参数名
-        description: '部署环境'             # description：表单上显示的说明文字
-        type: choice                       # type：参数类型，choice 是下拉选择
-        options: [dev, qa, staging, prod]  # options：下拉框的可选值
-        default: dev                       # default：默认选中的值
+  workflow_call:                           # 声明为可复用 workflow，不会被 push/PR 直接触发
+    inputs:
+      environment:                         # 参数名：environment
+        type: string                        # 类型：字符串
+        required: true                      # 必填
+    secrets:
+      aws-role-arn:                        # 需要调用方传入的密钥
+        required: true                      # 必填
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
+  deploy:                                  # job id：deploy
+    runs-on: [self-hosted, linux]          # runs-on 可以写多个标签，指定 self-hosted runner
+    environment: ${{ inputs.environment }} # environment：关联到 GitHub Environment，可加人工审批保护
     steps:
-      - run: make deploy ENV=${{ inputs.environment }}   # inputs.参数名 取到表单里填的值
+      - run: make deploy ENV=${{ inputs.environment }}
+        # 复用 Makefile 套路：yml 只编排，具体逻辑在 Makefile 里

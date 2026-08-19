@@ -7,7 +7,6 @@ on:
     secrets:
       aws-role-arn:
         required: true
-        type: string
 jobs:
   deploy:
     runs-on: ubuntu-latest

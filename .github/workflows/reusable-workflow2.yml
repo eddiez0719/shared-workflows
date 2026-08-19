@@ -1,19 +1,27 @@
-name: Reusable Deploy                      # 显示在 Actions 页面的 workflow 名字
+name: Reusable Deploy
 
 on:
-  workflow_call:                           # 声明为可复用 workflow，不会被 push/PR 直接触发
+  workflow_call:
     inputs:
-      environment:                         # 参数名：environment
-        type: string                        # 类型：字符串
-        required: true                      # 必填
+      environment:
+        type: string
+        required: true
+
     secrets:
-      aws-role-arn:                        # 需要调用方传入的密钥
-        required: true                      # 必填
+      aws-role-arn:
+        required: true
 
 jobs:
-  deploy:                                  # job id：deploy
-    runs-on: [self-hosted, linux]          # runs-on 可以写多个标签，指定 self-hosted runner
-    environment: ${{ inputs.environment }} # environment：关联到 GitHub Environment，可加人工审批保护
+  deploy:
+    runs-on: [self-hosted, linux]
+
+    environment: ${{ inputs.environment }}
+
     steps:
-      - run: make deploy ENV=${{ inputs.environment }}
-        # 复用 Makefile 套路：yml 只编排，具体逻辑在 Makefile 里
+      # GitHub Actions 不会自动 checkout repo
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # YAML 只负责编排，真正 deploy logic 放在 Makefile
+      - name: Deploy
+        run: make deploy ENV=${{ inputs.environment }}
